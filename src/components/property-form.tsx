@@ -1,9 +1,15 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import { Money, Percent } from "~/components/ui/decimal";
+import { Button } from "~/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -96,7 +102,7 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
   const monthlyTaxes = result.taxesYearly / 12;
   const monthlyInsurance = result.insurance / 12;
   const vacancy = result.monthlyRent * 0.05;
-  const capex = result.monthlyRent * 0.05;
+  const capitalExpenditures = result.monthlyRent * 0.05;
   const repairs = result.monthlyRent * 0.05;
 
   const monthlyMortgagePayment = PMT(
@@ -109,7 +115,7 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
     monthlyTaxes +
     monthlyInsurance +
     vacancy +
-    capex +
+    capitalExpenditures +
     repairs -
     monthlyMortgagePayment;
   const netMonthlyCashFlow = result.monthlyRent - totalMonthlyCost;
@@ -120,7 +126,7 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
   const cashFlow = result.monthlyRent * 0.5 + monthlyMortgagePayment;
   const totalClose =
     result.purchasePrice * (1 - result.ltv / 100) +
-    result.totalRehabCost +
+    //result.totalRehabCost +
     result.closing;
   const coCROI = (netMonthlyCashFlow * 12) / totalClose;
 
@@ -141,13 +147,63 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
             <AccordionItem value="property-details">
               <AccordionTrigger>Property Details</AccordionTrigger>
               <AccordionContent>
-                <div className="flex flex-col gap-2 border bg-gray-50 p-3">
+                <div className="flex flex-col gap-2 border bg-gray-100 p-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField
+                      control={form.control}
+                      name="purchasePrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Purchase Price"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <span className="input-group-text">{"$"}</span>
+                              <Input
+                                {...field}
+                                type="number"
+                                inputMode="decimal"
+                                className="bg-white"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            {"Purchase price of the property"}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="taxesYearly"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Taxes"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <span className="input-group-text">{"$"}</span>
+                              <Input
+                                {...field}
+                                type="number"
+                                inputMode="decimal"
+                                className="bg-white"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            {"Yearly total taxes"}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
-                    name="purchasePrice"
+                    name="closing"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{"Purchase Price"}</FormLabel>
+                        <FormLabel>{"Closing Costs"}</FormLabel>
                         <FormControl>
                           <div className="input-group">
                             <span className="input-group-text">{"$"}</span>
@@ -160,36 +216,13 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
                           </div>
                         </FormControl>
                         <FormDescription>
-                          {"Purchase price of the property"}
+                          {"Total amount necessary to close on the property"}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="taxesYearly"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Taxes"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <span className="input-group-text">{"$"}</span>
-                            <Input
-                              {...field}
-                              type="number"
-                              inputMode="decimal"
-                              className="bg-white"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          {"Yearly total taxes"}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
                   <FormField
                     control={form.control}
                     name="insurance"
@@ -208,7 +241,7 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
                           </div>
                         </FormControl>
                         <FormDescription>
-                          {"Yearly insurance for the property"}
+                          {"Yearly homeowners insurance for the property"}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -220,7 +253,7 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
             <AccordionItem value="loan-info">
               <AccordionTrigger>Loan Details</AccordionTrigger>
               <AccordionContent>
-                <div className="flex flex-col gap-2 border bg-gray-50 p-3">
+                <div className="flex flex-col gap-2 border bg-gray-100 p-3">
                   <FormField
                     control={form.control}
                     name="loanRate"
@@ -277,7 +310,7 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
             <AccordionItem value="income">
               <AccordionTrigger>{"Income"}</AccordionTrigger>
               <AccordionContent>
-                <div className="flex flex-col gap-2 border bg-gray-50 p-3">
+                <div className="flex flex-col gap-2 border bg-gray-100 p-3">
                   <FormField
                     control={form.control}
                     name="monthlyRent"
@@ -308,7 +341,7 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
             {/* <AccordionItem value="rehab">
               <AccordionTrigger>{"Rehab Details"}</AccordionTrigger>
               <AccordionContent>
-                <div className="flex flex-col gap-2 bg-gray-50 p-3">
+                <div className="flex flex-col gap-2 bg-gray-100 p-3">
                   <FormField
                     control={form.control}
                     name="totalRehabCost"
@@ -358,7 +391,7 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
             <AccordionItem value="expenses">
               <AccordionTrigger>{"Expenses"}</AccordionTrigger>
               <AccordionContent>
-                <div className="flex flex-col gap-2 bg-gray-50 p-3"></div>
+                <div className="flex flex-col gap-2 bg-gray-100 p-3"></div>
               </AccordionContent>
             </AccordionItem> */}
           </Accordion>
@@ -397,6 +430,12 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
                     : "bad"
                 }
                 title="Monthly Cash Flow"
+                description={
+                  <div>
+                    <p className="mb-3">{`Monthly revenue left after all expenses`}</p>
+                    <GWB good={"> $400"} warn="> $100" bad="< 0%" />
+                  </div>
+                }
               />
 
               <KPI_Row
@@ -409,7 +448,13 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
                     ? "warning"
                     : "bad"
                 }
-                title="One Percent Rule"
+                title="1% Percent Rule"
+                description={
+                  <div>
+                    <p className="mb-3">{`The 1% rule says that monthly rent should equal to 1% of the purchase price.`}</p>
+                    <GWB good={"> 1%"} warn="> 0%" bad="< 0%" />
+                  </div>
+                }
               />
               <KPI_Row
                 format="percent"
@@ -418,17 +463,54 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
                   capRate >= 0.08 ? "good" : capRate > 0.05 ? "warning" : "bad"
                 }
                 title="Cap Rate"
+                description={
+                  <div>
+                    <div className="my-3 flex flex-col divide-y-2 text-center">
+                      <var>{"Net Operating Income"}</var>
+                      <var>{"Market Value"}</var>
+                    </div>
+                    <GWB good={"> 8%"} warn="5-8%" bad={"< 5%"} />
+                  </div>
+                }
               />
               <KPI_Row
                 format="money"
                 value={cashFlow}
                 level={cashFlow > 0 ? "good" : cashFlow < 0 ? "bad" : "warning"}
                 title="50% Rule for Cash Flow"
+                description={
+                  <div>
+                    <p>{`The 50% Rule says that you should estimate your operating expenses to be 50% of gross income (sometimes referred to as an expense ratio of 50%).`}</p>
+                    <div className="flex items-center justify-center">
+                      <div className="my-3 flex items-center gap-3">
+                        <div className="flex flex-col items-center">
+                          <var className={"border-b-2 px-2"}>
+                            {"Monthly Rent"}
+                          </var>
+                          <var>{"2"}</var>
+                        </div>
+                        <Minus className="h-4 w-4" />
+                        <var>{"Mortgage Payment"}</var>
+                      </div>
+                    </div>
+                    <GWB good={"> $0"} warn="$0" bad={"< $0"} />
+                  </div>
+                }
               />
               <KPI_Row
                 format="percent"
                 value={coCROI}
                 level={coCROI >= 0.08 ? "good" : coCROI > 0 ? "warning" : "bad"}
+                description={
+                  <div>
+                    <p>{`Cash-on-Cash return or (CoCROI) calculate the cash income earned on the cash invested in a property. It measures the annual return the invenstor made on the property in realtion to the amount of morgatge paid during the same year.`}</p>
+                    <div className="my-3 flex flex-col divide-y-2 text-center">
+                      <var>{"Annual Income"}</var>
+                      <var>{"Amount Invested"}</var>
+                    </div>
+                    <GWB good={"> 0.08"} warn="> 0" bad="< 0" />
+                  </div>
+                }
                 title="CoCROI"
               />
               <KPI_Row
@@ -444,9 +526,29 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
   );
 };
 
-export const KPI_Row: React.FC<{
+const GWB: React.FC<{
+  good: React.ReactNode;
+  warn: React.ReactNode;
+  bad: React.ReactNode;
+}> = (props) => {
+  return (
+    <div
+      className="grid items-center gap-1 rounded border p-3"
+      style={{ gridTemplateColumns: "auto 1fr" }}
+    >
+      <div className="h-4 w-20 rounded bg-green-200"></div>
+      <div className="text-right">{props.good}</div>
+      <div className="h-4 w-20 rounded bg-yellow-200"></div>
+      <div className="text-right">{props.warn}</div>
+      <div className="h-4 w-20 rounded bg-red-200"></div>
+      <div className="text-right">{props.bad}</div>
+    </div>
+  );
+};
+
+const KPI_Row: React.FC<{
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   value: number;
   format: "money" | "percent";
   level?: "good" | "bad" | "warning";
@@ -460,11 +562,18 @@ export const KPI_Row: React.FC<{
     <>
       <div>{props.title}</div>
       <div className={cn("text-right")}>
-        {props.format === "money" ? (
-          <Money value={props.value} className={cellCN} />
-        ) : (
-          <Percent value={props.value} className={cellCN} decimalPlaces={2} />
-        )}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cellCN}>
+              {props.format === "money" ? (
+                <Money value={props.value} />
+              ) : (
+                <Percent value={props.value} decimalPlaces={2} />
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80">{props.description}</PopoverContent>
+        </Popover>
       </div>
     </>
   );

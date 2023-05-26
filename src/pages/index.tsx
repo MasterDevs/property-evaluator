@@ -1,13 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 import { type NextPage } from "next";
-import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
 import PropertyForm from "~/components/property-form";
-import { api } from "~/utils/api";
+import Link from "next/link";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
-
   return (
     <>
       <Head>
@@ -17,12 +14,22 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Property <span className="text-[hsl(280,100%,70%)]">Evaluator</span>
+          <h1 className="text-5xl font-extrabold tracking-tight underline decoration-[#a09d87] sm:text-[5rem]">
+            <span className="">Property</span>{" "}
+            <span className="text-[#1694db]">Evaluator</span>
           </h1>
           <div>
             <PropertyForm />
           </div>
+        </div>
+        <div className="flex max-w-[10rem] flex-col items-center">
+          <small>{"by"}</small>
+          <Link href={"https://masterdevs.com"}>
+            <img
+              src={"https://masterdevs.com/mdevs_cmyk.svg"}
+              alt="MasterDevs Logo"
+            />
+          </Link>
         </div>
       </main>
     </>
@@ -30,27 +37,3 @@ const Home: NextPage = () => {
 };
 
 export default Home;
-
-const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
-
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined }
-  );
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
-      </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
-    </div>
-  );
-};

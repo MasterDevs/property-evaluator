@@ -131,12 +131,15 @@ const PropertyForm: React.FC = () => {
                       <FormItem>
                         <FormLabel>{"Purchase Price"}</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            inputMode="decimal"
-                            className="bg-white"
-                          />
+                          <div className="input-group">
+                            <span className="input-group-text">{"$"}</span>
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="decimal"
+                              className="bg-white"
+                            />
+                          </div>
                         </FormControl>
                         <FormDescription>
                           {"Purchase price of the property"}
@@ -152,12 +155,15 @@ const PropertyForm: React.FC = () => {
                       <FormItem>
                         <FormLabel>{"Taxes"}</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            inputMode="decimal"
-                            className="bg-white"
-                          />
+                          <div className="input-group">
+                            <span className="input-group-text">{"$"}</span>
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="decimal"
+                              className="bg-white"
+                            />
+                          </div>
                         </FormControl>
                         <FormDescription>
                           {"Yearly total taxes"}
@@ -173,12 +179,15 @@ const PropertyForm: React.FC = () => {
                       <FormItem>
                         <FormLabel>{"Insurance"}</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            inputMode="decimal"
-                            className="bg-white"
-                          />
+                          <div className="input-group">
+                            <span className="input-group-text">{"$"}</span>
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="decimal"
+                              className="bg-white"
+                            />
+                          </div>
                         </FormControl>
                         <FormDescription>
                           {"Yearly insurance for the property"}
@@ -201,15 +210,17 @@ const PropertyForm: React.FC = () => {
                       <FormItem>
                         <FormLabel>{"Loan Rate"}</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            className="bg-white"
-                            type="number"
-                            inputMode="decimal"
-                            step={0.5}
-                          />
+                          <div className="input-group">
+                            <Input
+                              {...field}
+                              className="bg-white"
+                              type="number"
+                              inputMode="decimal"
+                              step={0.5}
+                            />
+                            <span className="input-group-text">{"%"}</span>
+                          </div>
                         </FormControl>
-                        {/* <FormDescription>{"Loan Rate"}</FormDescription> */}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -222,13 +233,16 @@ const PropertyForm: React.FC = () => {
                       <FormItem>
                         <FormLabel>{"Loan To Value"}</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            className="bg-white"
-                            inputMode="decimal"
-                            step={0.5}
-                          />
+                          <div className="input-group">
+                            <Input
+                              {...field}
+                              type="number"
+                              className="bg-white"
+                              inputMode="decimal"
+                              step={0.5}
+                            />
+                            <span className="input-group-text">{"%"}</span>
+                          </div>
                         </FormControl>
                         <FormDescription>
                           {
@@ -245,7 +259,7 @@ const PropertyForm: React.FC = () => {
             <AccordionItem value="income">
               <AccordionTrigger>{"Income"}</AccordionTrigger>
               <AccordionContent>
-                <div className="flex flex-col gap-2 bg-gray-50 p-3">
+                <div className="flex flex-col gap-2 border bg-gray-50 p-3">
                   <FormField
                     control={form.control}
                     name="monthlyRent"
@@ -253,12 +267,15 @@ const PropertyForm: React.FC = () => {
                       <FormItem>
                         <FormLabel>{"Rent"}</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            inputMode="decimal"
-                            className="bg-white"
-                          />
+                          <div className="input-group">
+                            <span className="input-group-text">{"$"}</span>
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="decimal"
+                              className="bg-white"
+                            />
+                          </div>
                         </FormControl>
                         <FormDescription>
                           {"Monthly Gross Rent"}

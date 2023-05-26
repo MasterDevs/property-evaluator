@@ -8,7 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { Money, Percent } from "~/components/ui/decimal";
+import { Money, Percent, getDisplaySpecial } from "~/components/ui/decimal";
 import { Button } from "~/components/ui/button";
 import {
   Accordion,
@@ -42,20 +42,12 @@ const SCHEMA = z.object({
   postRehabValue: z.coerce.number().default(650000),
   taxesYearly: z.coerce.number().default(7500),
   closing: z.coerce.number().default(10000),
+  vacancyRate: z.coerce.number().default(5),
+  capitalExpendituresRate: z.coerce.number().default(5),
+  repairRate: z.coerce.number().default(5),
 });
 
-const defaultValues = {
-  purchasePrice: 500000,
-  monthlyRent: 1000,
-  insurance: 1200,
-  loanRate: 6.5,
-  ltv: 80,
-  months: 360,
-  totalRehabCost: 15000,
-  postRehabValue: 650000,
-  taxesYearly: 7500,
-  closing: 10000,
-};
+type SCHEMA = z.infer<typeof SCHEMA>;
 
 /**
  *
@@ -91,7 +83,7 @@ function PMT(ir: number, np: number, pv: number, fv: number, type: 0 | 1 = 0) {
   return pmt;
 }
 
-const PropertyForm: React.FC<typeof defaultValues> = (props) => {
+const PropertyForm: React.FC<SCHEMA> = (props) => {
   const form = useForm({
     resolver: zodResolver(SCHEMA),
     defaultValues: SCHEMA.parse(props),
@@ -101,9 +93,10 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
 
   const monthlyTaxes = result.taxesYearly / 12;
   const monthlyInsurance = result.insurance / 12;
-  const vacancy = result.monthlyRent * 0.05;
-  const capitalExpenditures = result.monthlyRent * 0.05;
-  const repairs = result.monthlyRent * 0.05;
+  const vacancy = (result.monthlyRent * result.vacancyRate) / 100;
+  const capitalExpenditures =
+    (result.monthlyRent * result.capitalExpendituresRate) / 100;
+  const repairs = (result.monthlyRent * result.repairRate) / 100;
 
   const monthlyMortgagePayment = PMT(
     result.loanRate / 100 / 12,
@@ -198,30 +191,6 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
                       )}
                     />
                   </div>
-                  <FormField
-                    control={form.control}
-                    name="closing"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Closing Costs"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <span className="input-group-text">{"$"}</span>
-                            <Input
-                              {...field}
-                              type="number"
-                              inputMode="decimal"
-                              className="bg-white"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          {"Total amount necessary to close on the property"}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={form.control}
@@ -338,6 +307,113 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
                 </div>
               </AccordionContent>
             </AccordionItem>
+            <AccordionItem value="assumptions">
+              <AccordionTrigger>{"Assumptions"}</AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-2 border bg-gray-100 p-3">
+                  <FormField
+                    control={form.control}
+                    name="capitalExpendituresRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{"Capex Rate"}</FormLabel>
+                        <FormControl>
+                          <div className="input-group">
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="decimal"
+                              className="bg-white"
+                            />
+                            <span className="input-group-text">{"%"}</span>
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          {
+                            "Rate of monthly revenue to put aside for capital expenditures"
+                          }
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="repairRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{"Repair Rate"}</FormLabel>
+                        <FormControl>
+                          <div className="input-group">
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="decimal"
+                              className="bg-white"
+                            />
+                            <span className="input-group-text">{"%"}</span>
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          {"Rate of monthly revenue to put aside for repairs"}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="vacancyRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{"Vacancy Rate"}</FormLabel>
+                        <FormControl>
+                          <div className="input-group">
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="decimal"
+                              className="bg-white"
+                            />
+                            <span className="input-group-text">{"%"}</span>
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          {
+                            "Rate of monthly revenue to put aside for vacancy between tenants"
+                          }
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="closing"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{"Closing Costs"}</FormLabel>
+                        <FormControl>
+                          <div className="input-group">
+                            <span className="input-group-text">{"$"}</span>
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="decimal"
+                              className="bg-white"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          {"Total amount necessary to close on the property"}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
             {/* <AccordionItem value="rehab">
               <AccordionTrigger>{"Rehab Details"}</AccordionTrigger>
               <AccordionContent>
@@ -432,7 +508,41 @@ const PropertyForm: React.FC<typeof defaultValues> = (props) => {
                 title="Monthly Cash Flow"
                 description={
                   <div>
-                    <p className="mb-3">{`Monthly revenue left after all expenses`}</p>
+                    <p className="mb-3">{`Monthly revenue left after all expenses: `}</p>
+                    <div className="mb-3 grid grid-cols-2 [&>*:nth-child(even)]:text-right">
+                      <div className="mb-2 border-b font-bold">
+                        {"Monthly Revenue"}
+                      </div>
+                      <Money
+                        value={result.monthlyRent}
+                        className="mb-2 border-b font-bold"
+                      />
+
+                      <div>{"Taxes"}</div>
+                      <Money value={monthlyTaxes} decimalPlaces={0} />
+                      <div>{"Insurance"}</div>
+                      <Money value={monthlyInsurance} decimalPlaces={0} />
+                      <div>{`Vacancy (${getDisplaySpecial(
+                        result.vacancyRate / 100,
+                        "percent"
+                      )})`}</div>
+                      <Money value={vacancy} decimalPlaces={0} />
+                      <div title="Capital Expenditures">{`CapEx (${getDisplaySpecial(
+                        result.capitalExpendituresRate / 100,
+                        "percent"
+                      )})`}</div>
+                      <Money value={capitalExpenditures} decimalPlaces={0} />
+                      <div>{`Repair (${getDisplaySpecial(
+                        result.repairRate / 100,
+                        "percent"
+                      )})`}</div>
+                      <Money value={repairs} decimalPlaces={0} />
+                      <div>{"Mortgage Payment"}</div>
+                      <Money
+                        value={monthlyMortgagePayment * -1}
+                        decimalPlaces={0}
+                      />
+                    </div>
                     <GWB good={"> $400"} warn="> $100" bad="< 0%" />
                   </div>
                 }

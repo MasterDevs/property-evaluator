@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import * as React from "react";
 import { useForm } from "react-hook-form";
+import { ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Money, Percent } from "~/components/ui/decimal";
 import {
@@ -20,6 +21,22 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
+import Link from "next/link";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const SCHEMA = z.object({
+  purchasePrice: z.coerce.number().default(500000),
+  monthlyRent: z.coerce.number().default(1000),
+  insurance: z.coerce.number().default(1200),
+  loanRate: z.coerce.number().default(6.5),
+  ltv: z.coerce.number().default(80),
+  months: z.coerce.number().default(360),
+  totalRehabCost: z.coerce.number().default(15000),
+  postRehabValue: z.coerce.number().default(650000),
+  taxesYearly: z.coerce.number().default(7500),
+  closing: z.coerce.number().default(10000),
+});
 
 const defaultValues = {
   purchasePrice: 500000,
@@ -68,9 +85,10 @@ function PMT(ir: number, np: number, pv: number, fv: number, type: 0 | 1 = 0) {
   return pmt;
 }
 
-const PropertyForm: React.FC = () => {
+const PropertyForm: React.FC<typeof defaultValues> = (props) => {
   const form = useForm({
-    defaultValues: defaultValues,
+    resolver: zodResolver(SCHEMA),
+    defaultValues: SCHEMA.parse(props),
   });
 
   const result = form.watch();
@@ -349,7 +367,19 @@ const PropertyForm: React.FC = () => {
       <div>
         <Card>
           <CardHeader className="mb-5 border-b">
-            <CardTitle>{"KPI's"}</CardTitle>
+            <CardTitle className="flex justify-between">
+              <span>{"KPI's"}</span>
+              <Link
+                href={`/?${Object.keys(result)
+                  .map((k) => `${k}=${result[k as keyof typeof result]}`)
+                  .join("&")}`}
+                target="_blank"
+                className="flex items-center gap-1"
+              >
+                {"Share"}
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            </CardTitle>
             <p className="italic text-muted-foreground">
               {"Long Term Rental KPI's"}
             </p>

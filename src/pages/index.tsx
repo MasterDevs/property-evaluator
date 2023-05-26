@@ -3,8 +3,11 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import PropertyForm from "~/components/property-form";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
+  const query = useRouter().query;
+
   return (
     <>
       <Head>
@@ -18,8 +21,9 @@ const Home: NextPage = () => {
             <span className="">Property</span>{" "}
             <span className="text-[#1694db]">Evaluator</span>
           </h1>
-          <div>
-            <PropertyForm />
+
+          <div key={JSON.stringify(query) || "-"}>
+            <PropertyForm {...(query as any)} />
           </div>
         </div>
         <div className="flex max-w-[10rem] flex-col items-center">

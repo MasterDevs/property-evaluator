@@ -4,16 +4,17 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
+import ogs from "open-graph-scraper";
 
-export const exampleRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
+export const mainRouter = createTRPCRouter({
+  scrapeUrl: publicProcedure
+    .input(z.object({ url: z.string().url() }))
+    .query(async ({ input }) => {
+      const result = await ogs({
+        url: input.url,
+      });
+      return result.result;
     }),
-
   getAll: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.example.findMany();
   }),

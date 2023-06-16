@@ -30,6 +30,9 @@ import { cn } from "~/lib/utils";
 import Link from "next/link";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Textarea } from "~/components/ui/textarea";
+import { useOgGraph } from "~/hooks/use-og-graph";
+import OGPreview from "~/components/og-preview";
 
 const SCHEMA = z.object({
   purchasePrice: z.coerce.number().default(500000),
@@ -45,6 +48,8 @@ const SCHEMA = z.object({
   vacancyRate: z.coerce.number().default(5),
   capitalExpendituresRate: z.coerce.number().default(5),
   repairRate: z.coerce.number().default(5),
+  url: z.coerce.string().default(""),
+  notes: z.coerce.string().default(""),
 });
 
 type SCHEMA = z.infer<typeof SCHEMA>;
@@ -91,6 +96,8 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
 
   const result = form.watch();
 
+  const ogData = useOgGraph(result.url);
+
   const monthlyTaxes = result.taxesYearly / 12;
   const monthlyInsurance = result.insurance / 12;
   const vacancy = (result.monthlyRent * result.vacancyRate) / 100;
@@ -124,54 +131,111 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
   const coCROI = (netMonthlyCashFlow * 12) / totalClose;
 
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-0">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit((v) => {
-            console.log("Values", v);
-          })}
-          className="h-full w-full place-self-end rounded-lg border px-3 py-3 md:w-96 md:rounded-l-lg md:rounded-r-none"
-        >
-          <Accordion
-            type="single"
-            className="w-full"
-            defaultValue="property-details"
+    <div>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-0">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit((v) => {
+              console.log("Values", v);
+            })}
+            className="h-full w-full place-self-end rounded-lg border px-3 py-3 md:w-96 md:rounded-l-lg md:rounded-r-none"
           >
-            <AccordionItem value="property-details">
-              <AccordionTrigger>Property Details</AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-col gap-2 border bg-gray-100 p-3">
-                  <div className="grid grid-cols-2 gap-3">
+            <Accordion
+              type="single"
+              className="w-full"
+              defaultValue="property-details"
+            >
+              <AccordionItem value="property-details">
+                <AccordionTrigger>Property Details</AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex flex-col gap-2 border bg-gray-100 p-3">
                     <FormField
                       control={form.control}
-                      name="purchasePrice"
+                      name="url"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{"Purchase Price"}</FormLabel>
+                          <FormLabel>{"Property Url"}</FormLabel>
                           <FormControl>
-                            <div className="input-group">
-                              <span className="input-group-text">{"$"}</span>
-                              <Input
-                                {...field}
-                                type="number"
-                                inputMode="decimal"
-                                className="bg-white"
-                              />
-                            </div>
+                            <Input {...field} className="bg-white" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Notes"}</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} className="bg-white" />
                           </FormControl>
                           <FormDescription>
-                            {"Purchase price of the property"}
+                            {"Any notes you want to leave"}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField
+                        control={form.control}
+                        name="purchasePrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{"Purchase Price"}</FormLabel>
+                            <FormControl>
+                              <div className="input-group">
+                                <span className="input-group-text">{"$"}</span>
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  inputMode="decimal"
+                                  className="bg-white"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              {"Purchase price of the property"}
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="taxesYearly"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{"Taxes"}</FormLabel>
+                            <FormControl>
+                              <div className="input-group">
+                                <span className="input-group-text">{"$"}</span>
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  inputMode="decimal"
+                                  className="bg-white"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              {"Yearly total taxes"}
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
                     <FormField
                       control={form.control}
-                      name="taxesYearly"
+                      name="insurance"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{"Taxes"}</FormLabel>
+                          <FormLabel>{"Insurance"}</FormLabel>
                           <FormControl>
                             <div className="input-group">
                               <span className="input-group-text">{"$"}</span>
@@ -184,237 +248,211 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                             </div>
                           </FormControl>
                           <FormDescription>
-                            {"Yearly total taxes"}
+                            {"Yearly homeowners insurance for the property"}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="loan-info">
+                <AccordionTrigger>Loan Details</AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex flex-col gap-2 border bg-gray-100 p-3">
+                    <FormField
+                      control={form.control}
+                      name="loanRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Loan Rate"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <Input
+                                {...field}
+                                className="bg-white"
+                                type="number"
+                                inputMode="decimal"
+                                step={0.5}
+                              />
+                              <span className="input-group-text">{"%"}</span>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="insurance"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Insurance"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <span className="input-group-text">{"$"}</span>
-                            <Input
-                              {...field}
-                              type="number"
-                              inputMode="decimal"
-                              className="bg-white"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          {"Yearly homeowners insurance for the property"}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="loan-info">
-              <AccordionTrigger>Loan Details</AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-col gap-2 border bg-gray-100 p-3">
-                  <FormField
-                    control={form.control}
-                    name="loanRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Loan Rate"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <Input
-                              {...field}
-                              className="bg-white"
-                              type="number"
-                              inputMode="decimal"
-                              step={0.5}
-                            />
-                            <span className="input-group-text">{"%"}</span>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="ltv"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Loan To Value"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <Input
-                              {...field}
-                              type="number"
-                              className="bg-white"
-                              inputMode="decimal"
-                              step={0.5}
-                            />
-                            <span className="input-group-text">{"%"}</span>
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          {
-                            "What percentage of the purchase price are you borrowing?"
-                          }
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="income">
-              <AccordionTrigger>{"Income"}</AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-col gap-2 border bg-gray-100 p-3">
-                  <FormField
-                    control={form.control}
-                    name="monthlyRent"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Rent"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <span className="input-group-text">{"$"}</span>
-                            <Input
-                              {...field}
-                              type="number"
-                              inputMode="decimal"
-                              className="bg-white"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          {"Monthly Gross Rent"}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="assumptions">
-              <AccordionTrigger>{"Assumptions"}</AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-col gap-2 border bg-gray-100 p-3">
-                  <FormField
-                    control={form.control}
-                    name="capitalExpendituresRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Capex Rate"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <Input
-                              {...field}
-                              type="number"
-                              inputMode="decimal"
-                              className="bg-white"
-                            />
-                            <span className="input-group-text">{"%"}</span>
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          {
-                            "Rate of monthly revenue to put aside for capital expenditures"
-                          }
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="repairRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Repair Rate"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <Input
-                              {...field}
-                              type="number"
-                              inputMode="decimal"
-                              className="bg-white"
-                            />
-                            <span className="input-group-text">{"%"}</span>
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          {"Rate of monthly revenue to put aside for repairs"}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="vacancyRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Vacancy Rate"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <Input
-                              {...field}
-                              type="number"
-                              inputMode="decimal"
-                              className="bg-white"
-                            />
-                            <span className="input-group-text">{"%"}</span>
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          {
-                            "Rate of monthly revenue to put aside for vacancy between tenants"
-                          }
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="closing"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{"Closing Costs"}</FormLabel>
-                        <FormControl>
-                          <div className="input-group">
-                            <span className="input-group-text">{"$"}</span>
-                            <Input
-                              {...field}
-                              type="number"
-                              inputMode="decimal"
-                              className="bg-white"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          {"Total amount necessary to close on the property"}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            {/* <AccordionItem value="rehab">
+                    <FormField
+                      control={form.control}
+                      name="ltv"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Loan To Value"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <Input
+                                {...field}
+                                type="number"
+                                className="bg-white"
+                                inputMode="decimal"
+                                step={0.5}
+                              />
+                              <span className="input-group-text">{"%"}</span>
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            {
+                              "What percentage of the purchase price are you borrowing?"
+                            }
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="income">
+                <AccordionTrigger>{"Income"}</AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex flex-col gap-2 border bg-gray-100 p-3">
+                    <FormField
+                      control={form.control}
+                      name="monthlyRent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Rent"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <span className="input-group-text">{"$"}</span>
+                              <Input
+                                {...field}
+                                type="number"
+                                inputMode="decimal"
+                                className="bg-white"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            {"Monthly Gross Rent"}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="assumptions">
+                <AccordionTrigger>{"Assumptions"}</AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex flex-col gap-2 border bg-gray-100 p-3">
+                    <FormField
+                      control={form.control}
+                      name="capitalExpendituresRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Capex Rate"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <Input
+                                {...field}
+                                type="number"
+                                inputMode="decimal"
+                                className="bg-white"
+                              />
+                              <span className="input-group-text">{"%"}</span>
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            {
+                              "Rate of monthly revenue to put aside for capital expenditures"
+                            }
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="repairRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Repair Rate"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <Input
+                                {...field}
+                                type="number"
+                                inputMode="decimal"
+                                className="bg-white"
+                              />
+                              <span className="input-group-text">{"%"}</span>
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            {"Rate of monthly revenue to put aside for repairs"}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="vacancyRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Vacancy Rate"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <Input
+                                {...field}
+                                type="number"
+                                inputMode="decimal"
+                                className="bg-white"
+                              />
+                              <span className="input-group-text">{"%"}</span>
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            {
+                              "Rate of monthly revenue to put aside for vacancy between tenants"
+                            }
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="closing"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Closing Costs"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <span className="input-group-text">{"$"}</span>
+                              <Input
+                                {...field}
+                                type="number"
+                                inputMode="decimal"
+                                className="bg-white"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            {"Total amount necessary to close on the property"}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              {/* <AccordionItem value="rehab">
               <AccordionTrigger>{"Rehab Details"}</AccordionTrigger>
               <AccordionContent>
                 <div className="flex flex-col gap-2 bg-gray-100 p-3">
@@ -470,166 +508,168 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                 <div className="flex flex-col gap-2 bg-gray-100 p-3"></div>
               </AccordionContent>
             </AccordionItem> */}
-          </Accordion>
-        </form>
-      </Form>
-      <Card className="md:rounded-l-none md:border-l-0">
-        <CardHeader className="mb-5 border-b">
-          <CardTitle className="flex justify-between">
-            <span>{"KPI's"}</span>
-            <Link
-              href={`/?${Object.keys(result)
-                .map((k) => `${k}=${result[k as keyof typeof result]}`)
-                .join("&")}`}
-              target="_blank"
-              className="flex items-center gap-1"
-            >
-              {"Share"}
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-          </CardTitle>
-          <p className="italic text-muted-foreground">
-            {"Long Term Rental KPI's"}
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            <KPI_Row
-              format="money"
-              value={netMonthlyCashFlow}
-              level={
-                netMonthlyCashFlow > 400
-                  ? "good"
-                  : netMonthlyCashFlow > 100
-                  ? "warning"
-                  : "bad"
-              }
-              title="Monthly Cash Flow"
-              description={
-                <div>
-                  <p className="mb-3">{`Monthly revenue left after all expenses: `}</p>
-                  <div className="mb-3 grid grid-cols-2 [&>*:nth-child(even)]:text-right">
-                    <div className="mb-2 border-b font-bold">
-                      {"Monthly Revenue"}
-                    </div>
-                    <Money
-                      value={result.monthlyRent}
-                      className="mb-2 border-b font-bold"
-                    />
-
-                    <div>{"Taxes"}</div>
-                    <Money value={monthlyTaxes} decimalPlaces={0} />
-                    <div>{"Insurance"}</div>
-                    <Money value={monthlyInsurance} decimalPlaces={0} />
-                    <div>{`Vacancy (${getDisplaySpecial(
-                      result.vacancyRate / 100,
-                      "percent"
-                    )})`}</div>
-                    <Money value={vacancy} decimalPlaces={0} />
-                    <div title="Capital Expenditures">{`CapEx (${getDisplaySpecial(
-                      result.capitalExpendituresRate / 100,
-                      "percent"
-                    )})`}</div>
-                    <Money value={capitalExpenditures} decimalPlaces={0} />
-                    <div>{`Repair (${getDisplaySpecial(
-                      result.repairRate / 100,
-                      "percent"
-                    )})`}</div>
-                    <Money value={repairs} decimalPlaces={0} />
-                    <div>{"Mortgage Payment"}</div>
-                    <Money
-                      value={monthlyMortgagePayment * -1}
-                      decimalPlaces={0}
-                    />
-                  </div>
-                  <GWB good={"> $400"} warn="> $100" bad="< 0%" />
-                </div>
-              }
-            />
-
-            <KPI_Row
-              format="percent"
-              value={onePercentRule}
-              level={
-                onePercentRule >= 0.01
-                  ? "good"
-                  : onePercentRule > 0.008
-                  ? "warning"
-                  : "bad"
-              }
-              title="1% Percent Rule"
-              description={
-                <div>
-                  <p className="mb-3">{`The 1% rule says that monthly rent should equal to 1% of the purchase price.`}</p>
-                  <GWB good={"> 1%"} warn="> 0%" bad="< 0%" />
-                </div>
-              }
-            />
-            <KPI_Row
-              format="percent"
-              value={capRate}
-              level={
-                capRate >= 0.08 ? "good" : capRate > 0.05 ? "warning" : "bad"
-              }
-              title="Cap Rate"
-              description={
-                <div>
-                  <div className="my-3 flex flex-col divide-y-2 text-center">
-                    <var>{"Net Operating Income"}</var>
-                    <var>{"Market Value"}</var>
-                  </div>
-                  <GWB good={"> 8%"} warn="5-8%" bad={"< 5%"} />
-                </div>
-              }
-            />
-            <KPI_Row
-              format="money"
-              value={cashFlow}
-              level={cashFlow > 0 ? "good" : cashFlow < 0 ? "bad" : "warning"}
-              title="50% Rule for Cash Flow"
-              description={
-                <div>
-                  <p>{`The 50% Rule says that you should estimate your operating expenses to be 50% of gross income (sometimes referred to as an expense ratio of 50%).`}</p>
-                  <div className="flex items-center justify-center">
-                    <div className="my-3 flex items-center gap-3">
-                      <div className="flex flex-col items-center">
-                        <var className={"border-b-2 px-2"}>
-                          {"Monthly Rent"}
-                        </var>
-                        <var>{"2"}</var>
+            </Accordion>
+          </form>
+        </Form>
+        <Card className="md:rounded-l-none md:border-l-0">
+          <CardHeader className="mb-5 border-b">
+            <CardTitle className="flex justify-between">
+              <span>{"KPI's"}</span>
+              <Link
+                href={`/?${Object.keys(result)
+                  .map((k) => `${k}=${result[k as keyof typeof result]}`)
+                  .join("&")}`}
+                target="_blank"
+                className="flex items-center gap-1"
+              >
+                {"Share"}
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            </CardTitle>
+            <p className="italic text-muted-foreground">
+              {"Long Term Rental KPI's"}
+            </p>
+            <OGPreview ogData={ogData.data} url={result.url} />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              <KPI_Row
+                format="money"
+                value={netMonthlyCashFlow}
+                level={
+                  netMonthlyCashFlow > 400
+                    ? "good"
+                    : netMonthlyCashFlow > 100
+                    ? "warning"
+                    : "bad"
+                }
+                title="Monthly Cash Flow"
+                description={
+                  <div>
+                    <p className="mb-3">{`Monthly revenue left after all expenses: `}</p>
+                    <div className="mb-3 grid grid-cols-2 [&>*:nth-child(even)]:text-right">
+                      <div className="mb-2 border-b font-bold">
+                        {"Monthly Revenue"}
                       </div>
-                      <Minus className="h-4 w-4" />
-                      <var>{"Mortgage Payment"}</var>
+                      <Money
+                        value={result.monthlyRent}
+                        className="mb-2 border-b font-bold"
+                      />
+
+                      <div>{"Taxes"}</div>
+                      <Money value={monthlyTaxes} decimalPlaces={0} />
+                      <div>{"Insurance"}</div>
+                      <Money value={monthlyInsurance} decimalPlaces={0} />
+                      <div>{`Vacancy (${getDisplaySpecial(
+                        result.vacancyRate / 100,
+                        "percent"
+                      )})`}</div>
+                      <Money value={vacancy} decimalPlaces={0} />
+                      <div title="Capital Expenditures">{`CapEx (${getDisplaySpecial(
+                        result.capitalExpendituresRate / 100,
+                        "percent"
+                      )})`}</div>
+                      <Money value={capitalExpenditures} decimalPlaces={0} />
+                      <div>{`Repair (${getDisplaySpecial(
+                        result.repairRate / 100,
+                        "percent"
+                      )})`}</div>
+                      <Money value={repairs} decimalPlaces={0} />
+                      <div>{"Mortgage Payment"}</div>
+                      <Money
+                        value={monthlyMortgagePayment * -1}
+                        decimalPlaces={0}
+                      />
                     </div>
+                    <GWB good={"> $400"} warn="> $100" bad="< 0%" />
                   </div>
-                  <GWB good={"> $0"} warn="$0" bad={"< $0"} />
-                </div>
-              }
-            />
-            <KPI_Row
-              format="percent"
-              value={coCROI}
-              level={coCROI >= 0.08 ? "good" : coCROI > 0 ? "warning" : "bad"}
-              description={
-                <div>
-                  <p>{`Cash-on-Cash return or (CoCROI) calculate the cash income earned on the cash invested in a property. It measures the annual return the invenstor made on the property in realtion to the amount of morgatge paid during the same year.`}</p>
-                  <div className="my-3 flex flex-col divide-y-2 text-center">
-                    <var>{"Annual Income"}</var>
-                    <var>{"Amount Invested"}</var>
+                }
+              />
+
+              <KPI_Row
+                format="percent"
+                value={onePercentRule}
+                level={
+                  onePercentRule >= 0.01
+                    ? "good"
+                    : onePercentRule > 0.008
+                    ? "warning"
+                    : "bad"
+                }
+                title="1% Percent Rule"
+                description={
+                  <div>
+                    <p className="mb-3">{`The 1% rule says that monthly rent should equal to 1% of the purchase price.`}</p>
+                    <GWB good={"> 1%"} warn="> 0%" bad="< 0%" />
                   </div>
-                  <GWB good={"> 0.08"} warn="> 0" bad="< 0" />
-                </div>
-              }
-              title="CoCROI"
-            />
-            <KPI_Row
-              format="money"
-              value={totalClose}
-              title="Total Cash to Close"
-            />
-          </div>
-        </CardContent>
-      </Card>
+                }
+              />
+              <KPI_Row
+                format="percent"
+                value={capRate}
+                level={
+                  capRate >= 0.08 ? "good" : capRate > 0.05 ? "warning" : "bad"
+                }
+                title="Cap Rate"
+                description={
+                  <div>
+                    <div className="my-3 flex flex-col divide-y-2 text-center">
+                      <var>{"Net Operating Income"}</var>
+                      <var>{"Market Value"}</var>
+                    </div>
+                    <GWB good={"> 8%"} warn="5-8%" bad={"< 5%"} />
+                  </div>
+                }
+              />
+              <KPI_Row
+                format="money"
+                value={cashFlow}
+                level={cashFlow > 0 ? "good" : cashFlow < 0 ? "bad" : "warning"}
+                title="50% Rule for Cash Flow"
+                description={
+                  <div>
+                    <p>{`The 50% Rule says that you should estimate your operating expenses to be 50% of gross income (sometimes referred to as an expense ratio of 50%).`}</p>
+                    <div className="flex items-center justify-center">
+                      <div className="my-3 flex items-center gap-3">
+                        <div className="flex flex-col items-center">
+                          <var className={"border-b-2 px-2"}>
+                            {"Monthly Rent"}
+                          </var>
+                          <var>{"2"}</var>
+                        </div>
+                        <Minus className="h-4 w-4" />
+                        <var>{"Mortgage Payment"}</var>
+                      </div>
+                    </div>
+                    <GWB good={"> $0"} warn="$0" bad={"< $0"} />
+                  </div>
+                }
+              />
+              <KPI_Row
+                format="percent"
+                value={coCROI}
+                level={coCROI >= 0.08 ? "good" : coCROI > 0 ? "warning" : "bad"}
+                description={
+                  <div>
+                    <p>{`Cash-on-Cash return or (CoCROI) calculate the cash income earned on the cash invested in a property. It measures the annual return the invenstor made on the property in realtion to the amount of morgatge paid during the same year.`}</p>
+                    <div className="my-3 flex flex-col divide-y-2 text-center">
+                      <var>{"Annual Income"}</var>
+                      <var>{"Amount Invested"}</var>
+                    </div>
+                    <GWB good={"> 0.08"} warn="> 0" bad="< 0" />
+                  </div>
+                }
+                title="CoCROI"
+              />
+              <KPI_Row
+                format="money"
+                value={totalClose}
+                title="Total Cash to Close"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

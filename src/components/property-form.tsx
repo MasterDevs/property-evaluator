@@ -8,7 +8,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { Money, Percent, getDisplaySpecial } from "~/components/ui/decimal";
+import {
+  Money,
+  Percent,
+  getDisplaySpecial,
+  getDisplayValue,
+} from "~/components/ui/decimal";
 import { Button } from "~/components/ui/button";
 import {
   Accordion,
@@ -643,7 +648,7 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                 description={
                   <div>
                     <p className="mb-3">{`The 1% rule says that monthly rent should equal to 1% of the purchase price.`}</p>
-                    <GWB good={"> 1%"} warn="> 0%" bad="< 0%" />
+                    <GWB good={"> 1%"} warn="> 0.8%" bad="< 0%" />
                   </div>
                 }
               />
@@ -694,11 +699,21 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                 level={coCROI >= 0.08 ? "good" : coCROI > 0 ? "warning" : "bad"}
                 description={
                   <div>
-                    <p>{`Cash-on-Cash return or (CoCROI) calculate the cash income earned on the cash invested in a property. It measures the annual return the invenstor made on the property in realtion to the amount of morgatge paid during the same year.`}</p>
+                    <p>{`Cash-on-Cash return or (CoCROI) calculate the cash income earned on the cash invested in a property. It measures the annual return the investor made on the property in relation to the amount of mortgage paid during the same year.`}</p>
+                    <p className="mt-2">{`Can we pull in more then the return we'd get from just putting our money in the S&P or some IndexFund`}</p>
                     <div className="my-3 flex flex-col divide-y-2 text-center">
-                      <var>{"Annual Income"}</var>
-                      <var>{"Amount Invested"}</var>
+                      <div className="flex justify-between">
+                        <var>{"Annual Income"}</var>
+                        <var>
+                          {getDisplayValue(netMonthlyCashFlow * 12, 0, "money")}
+                        </var>
+                      </div>
+                      <div className="flex justify-between">
+                        <var>{"Annual Invested"}</var>
+                        <var>{getDisplayValue(totalClose, 0, "money")}</var>
+                      </div>
                     </div>
+
                     <GWB good={"> 0.08"} warn="> 0" bad="< 0" />
                   </div>
                 }

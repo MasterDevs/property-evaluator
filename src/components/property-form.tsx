@@ -48,6 +48,7 @@ const SCHEMA = z.object({
   vacancyRate: z.coerce.number().default(5),
   capitalExpendituresRate: z.coerce.number().default(5),
   repairRate: z.coerce.number().default(5),
+  managementRate: z.coerce.number().default(0),
   url: z.coerce.string().default(""),
   notes: z.coerce.string().default(""),
 });
@@ -101,6 +102,7 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
   const monthlyTaxes = result.taxesYearly / 12;
   const monthlyInsurance = result.insurance / 12;
   const vacancy = (result.monthlyRent * result.vacancyRate) / 100;
+  const management = (result.monthlyRent * result.managementRate) / 100;
   const capitalExpenditures =
     (result.monthlyRent * result.capitalExpendituresRate) / 100;
   const repairs = (result.monthlyRent * result.repairRate) / 100;
@@ -115,13 +117,19 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
     monthlyTaxes +
     monthlyInsurance +
     vacancy +
+    management +
     capitalExpenditures +
     repairs -
     monthlyMortgagePayment;
   const netMonthlyCashFlow = result.monthlyRent - totalMonthlyCost;
   const onePercentRule = result.monthlyRent / result.purchasePrice;
   const capRate =
-    ((result.monthlyRent - monthlyTaxes - monthlyInsurance - vacancy) * 12) /
+    ((result.monthlyRent -
+      monthlyTaxes -
+      monthlyInsurance -
+      vacancy -
+      management) *
+      12) /
     result.purchasePrice;
   const cashFlow = result.monthlyRent * 0.5 + monthlyMortgagePayment;
   const totalClose =
@@ -427,6 +435,32 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                     />
                     <FormField
                       control={form.control}
+                      name="managementRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{"Management Rate"}</FormLabel>
+                          <FormControl>
+                            <div className="input-group">
+                              <Input
+                                {...field}
+                                type="number"
+                                inputMode="decimal"
+                                className="bg-white"
+                              />
+                              <span className="input-group-text">{"%"}</span>
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            {
+                              "Rate of monthly revenue to put aside for management of the property. Set to 0 if self managing."
+                            }
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
                       name="closing"
                       render={({ field }) => (
                         <FormItem>
@@ -565,6 +599,15 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                         "percent"
                       )})`}</div>
                       <Money value={vacancy} decimalPlaces={0} />
+                      {result.managementRate ? (
+                        <>
+                          <div>{`Management (${getDisplaySpecial(
+                            result.managementRate / 100,
+                            "percent"
+                          )})`}</div>
+                          <Money value={management} decimalPlaces={0} />
+                        </>
+                      ) : null}
                       <div title="Capital Expenditures">{`CapEx (${getDisplaySpecial(
                         result.capitalExpendituresRate / 100,
                         "percent"

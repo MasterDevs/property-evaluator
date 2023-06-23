@@ -38,6 +38,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "~/components/ui/textarea";
 import { useOgGraph } from "~/hooks/use-og-graph";
 import OGPreview from "~/components/og-preview";
+import { useRouter } from "next/router";
 
 const SCHEMA = z.object({
   purchasePrice: z.coerce.number().default(500000),
@@ -95,12 +96,18 @@ function PMT(ir: number, np: number, pv: number, fv: number, type: 0 | 1 = 0) {
 }
 
 const PropertyForm: React.FC<SCHEMA> = (props) => {
+
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(SCHEMA),
     defaultValues: SCHEMA.parse(props),
   });
 
   const result = form.watch();
+
+  const shareUrl = React.useMemo(() => `/?${Object.keys(result)
+    .map((k) => `${k}=${result[k as keyof typeof result]}`)
+    .join("&")}`, [result]);
 
   const ogData = useOgGraph(result.url);
 
@@ -555,9 +562,7 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
             <CardTitle className="flex justify-between">
               <span>{"KPI's"}</span>
               <Link
-                href={`/?${Object.keys(result)
-                  .map((k) => `${k}=${result[k as keyof typeof result]}`)
-                  .join("&")}`}
+                href={shareUrl}
                 target="_blank"
                 className="flex items-center gap-1"
               >
@@ -571,7 +576,7 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
             <OGPreview ogData={ogData.data} url={result.url} />
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 items-center">
               <KPI_Row
                 format="money"
                 value={netMonthlyCashFlow}
@@ -760,9 +765,9 @@ const KPI_Row: React.FC<{
   level?: "good" | "bad" | "warning";
 }> = (props) => {
   const cellCN = cn("rounded-md px-2", {
-    "bg-green-200 text-green-900": props.level === "good",
-    "bg-yellow-200 text-yellow-900": props.level === "warning",
-    "bg-red-200 text-red-900": props.level === "bad",
+    "bg-green-200 text-green-900 border-green-300 hover:bg-green-300 hover:border-green-400 hover:text-green-900": props.level === "good",
+    "bg-yellow-200 text-yellow-900 border-yellow-300 hover:bg-yellow-300 hover:border-yellow-400 hover:text-yellow-900": props.level === "warning",
+    "bg-red-200 text-red-900 border-red-300 hover:bg-red-300 hover:border-red-400 hover:text-red-900": props.level === "bad",
   });
   return (
     <>

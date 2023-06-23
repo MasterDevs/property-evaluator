@@ -584,8 +584,8 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                   netMonthlyCashFlow > 400
                     ? "good"
                     : netMonthlyCashFlow > 100
-                    ? "warning"
-                    : "bad"
+                      ? "warning"
+                      : "bad"
                 }
                 title="Monthly Cash Flow"
                 description={
@@ -646,8 +646,8 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                   onePercentRule >= 0.01
                     ? "good"
                     : onePercentRule > 0.008
-                    ? "warning"
-                    : "bad"
+                      ? "warning"
+                      : "bad"
                 }
                 title="1% Percent Rule"
                 description={
@@ -728,6 +728,25 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                 format="money"
                 value={totalClose}
                 title="Total Cash to Close"
+                description={<div>
+                  <p>{`Total cash to close is the amount of money needed to purchase the property (based on the LTV amount) as well as the closing costs.`}</p>
+                  <div className="my-3 grid grid-cols-2 [&>*:nth-child(even)]:text-right">
+                    <div className="">
+                      {"Down Payment"}
+                    </div>
+                    <Money
+                      value={result.purchasePrice * (1 - result.ltv / 100)}
+                      className=""
+                    />
+                    <div className="">
+                      {"Closing Costs"}
+                      </div>
+                      <Money
+                      value={result.closing}
+                      className=""
+                    />
+                  </div>
+                </div>}
               />
             </div>
           </CardContent>

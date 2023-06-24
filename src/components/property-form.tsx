@@ -38,7 +38,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "~/components/ui/textarea";
 import { useOgGraph } from "~/hooks/use-og-graph";
 import OGPreview from "~/components/og-preview";
-import { useRouter } from "next/router";
 
 const SCHEMA = z.object({
   purchasePrice: z.coerce.number().default(500000),
@@ -96,18 +95,27 @@ function PMT(ir: number, np: number, pv: number, fv: number, type: 0 | 1 = 0) {
 }
 
 const PropertyForm: React.FC<SCHEMA> = (props) => {
-
-  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(SCHEMA),
     defaultValues: SCHEMA.parse(props),
   });
 
-  const result = form.watch();
+  const values = form.watch();
+  const result = React.useMemo(() => {
+    const r = SCHEMA.safeParse(values);
+    if (r.success) {
+      return r.data;
+    }
+    return values;
+  }, [values]);
 
-  const shareUrl = React.useMemo(() => `/?${Object.keys(result)
-    .map((k) => `${k}=${result[k as keyof typeof result]}`)
-    .join("&")}`, [result]);
+  const shareUrl = React.useMemo(
+    () =>
+      `/?${Object.keys(result)
+        .map((k) => `${k}=${result[k as keyof typeof result]}`)
+        .join("&")}`,
+    [result]
+  );
 
   const ogData = useOgGraph(result.url);
 
@@ -576,7 +584,7 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
             <OGPreview ogData={ogData.data} url={result.url} />
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-3 items-center">
+            <div className="grid grid-cols-2 items-center gap-3">
               <KPI_Row
                 format="money"
                 value={netMonthlyCashFlow}
@@ -584,8 +592,8 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                   netMonthlyCashFlow > 400
                     ? "good"
                     : netMonthlyCashFlow > 100
-                      ? "warning"
-                      : "bad"
+                    ? "warning"
+                    : "bad"
                 }
                 title="Monthly Cash Flow"
                 description={
@@ -646,8 +654,8 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                   onePercentRule >= 0.01
                     ? "good"
                     : onePercentRule > 0.008
-                      ? "warning"
-                      : "bad"
+                    ? "warning"
+                    : "bad"
                 }
                 title="1% Percent Rule"
                 description={
@@ -728,25 +736,32 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                 format="money"
                 value={totalClose}
                 title="Total Cash to Close"
-                description={<div>
-                  <p>{`Total cash to close is the amount of money needed to purchase the property (based on the LTV amount) as well as the closing costs.`}</p>
-                  <div className="my-3 grid grid-cols-2 [&>*:nth-child(even)]:text-right">
-                    <div className="">
-                      {"Down Payment"}
-                    </div>
-                    <Money
-                      value={result.purchasePrice * (1 - result.ltv / 100)}
-                      className=""
-                    />
-                    <div className="">
-                      {"Closing Costs"}
-                      </div>
+                description={
+                  <div>
+                    <p>{`Total cash to close is the amount of money needed to purchase the property (based on the LTV amount) as well as the closing costs.`}</p>
+                    <div className="my-3 grid grid-cols-2 [&>*:nth-child(even)]:text-right">
+                      <div className="">{"Down Payment"}</div>
                       <Money
-                      value={result.closing}
-                      className=""
-                    />
+                        value={result.purchasePrice * (1 - result.ltv / 100)}
+                        className=""
+                      />
+                      <div className="">{"Closing Costs"}</div>
+                      <Money value={result.closing} className="" />
+                    </div>
+                    <div>
+                      {JSON.stringify(
+                        {
+                          totalClose,
+                          val: typeof totalClose,
+                          clos: typeof result.closing,
+                          purchase: typeof result.purchasePrice,
+                        },
+                        null,
+                        2
+                      )}
+                    </div>
                   </div>
-                </div>}
+                }
               />
             </div>
           </CardContent>
@@ -784,9 +799,12 @@ const KPI_Row: React.FC<{
   level?: "good" | "bad" | "warning";
 }> = (props) => {
   const cellCN = cn("rounded-md px-2", {
-    "bg-green-200 text-green-900 border-green-300 hover:bg-green-300 hover:border-green-400 hover:text-green-900": props.level === "good",
-    "bg-yellow-200 text-yellow-900 border-yellow-300 hover:bg-yellow-300 hover:border-yellow-400 hover:text-yellow-900": props.level === "warning",
-    "bg-red-200 text-red-900 border-red-300 hover:bg-red-300 hover:border-red-400 hover:text-red-900": props.level === "bad",
+    "bg-green-200 text-green-900 border-green-300 hover:bg-green-300 hover:border-green-400 hover:text-green-900":
+      props.level === "good",
+    "bg-yellow-200 text-yellow-900 border-yellow-300 hover:bg-yellow-300 hover:border-yellow-400 hover:text-yellow-900":
+      props.level === "warning",
+    "bg-red-200 text-red-900 border-red-300 hover:bg-red-300 hover:border-red-400 hover:text-red-900":
+      props.level === "bad",
   });
   return (
     <>

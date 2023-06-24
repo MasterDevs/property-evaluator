@@ -1,3 +1,14 @@
+# Property Evaluator
+
+This website will help you quickly determine if the property you're interested in will make sense for you.
+
+Features
+
+- Quickly generate KPI's from entering some basic data of on the property
+- Compare this property against similar deals in the network
+- Share deals with people looking for the type of investment opportunity (get rewarded for simply putting the deal to gether)
+- Find inventors interested in working on deals that meet particular criteria.
+
 # Create T3 App
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.

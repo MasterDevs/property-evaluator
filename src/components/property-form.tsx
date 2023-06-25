@@ -598,7 +598,7 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                 title="Monthly Cash Flow"
                 description={
                   <div>
-                    <GWB good={"> $400"} warn="> $100" bad="< 0%" />
+                    <GWB good={"> $400"} warn="> $100" bad="< $0" />
                     <p className="mb-3">{`Monthly revenue left after all expenses: `}</p>
                     <div className="mb-3 grid grid-cols-2 [&>*:nth-child(even)]:text-right">
                       <div className="mb-2 border-b font-bold">
@@ -660,7 +660,7 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                 title="1% Percent Rule"
                 description={
                   <div>
-                    <GWB good={"> 1%"} warn="> 0.8%" bad="< 0%" />
+                    <GWB good={"> 1%"} warn="> 0.8%" bad="< 0.8%" />
                     <p className="mb-3">{`The 1% rule says that monthly rent should equal to 1% of the purchase price.`}</p>
                   </div>
                 }
@@ -709,12 +709,14 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
               <KPI_Row
                 format="percent"
                 value={coCROI}
-                level={coCROI >= 0.08 ? "good" : coCROI > 0 ? "warning" : "bad"}
+                level={
+                  coCROI >= 0.08 ? "good" : coCROI > 0.05 ? "warning" : "bad"
+                }
                 description={
                   <div>
-                    <GWB good={"> 0.08"} warn="> 0" bad="< 0" />
+                    <GWB good={"> 8%"} warn="> 5%" bad="< 5%" />
                     <p>{`Cash-on-Cash return or (CoCROI) calculate the cash income earned on the cash invested in a property. It measures the annual return the investor made on the property in relation to the amount of mortgage paid during the same year.`}</p>
-                    <p className="mt-2">{`Can we pull in more then the return we'd get from just putting our money in the S&P or some IndexFund`}</p>
+                    <p className="mt-2">{`Can we pull in more then the return we'd get from just putting our money in the S&P or some IndexFund.`}</p>
                     <div className="my-3 flex flex-col divide-y-2 text-center">
                       <div className="flex justify-between">
                         <var>{"Annual Income"}</var>

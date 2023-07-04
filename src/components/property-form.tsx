@@ -119,44 +119,21 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
 
   const ogData = useOgGraph(result.url);
 
-  const monthlyTaxes = result.taxesYearly / 12;
-  const monthlyInsurance = result.insurance / 12;
-  const vacancy = (result.monthlyRent * result.vacancyRate) / 100;
-  const management = (result.monthlyRent * result.managementRate) / 100;
-  const capitalExpenditures =
-    (result.monthlyRent * result.capitalExpendituresRate) / 100;
-  const repairs = (result.monthlyRent * result.repairRate) / 100;
-
-  const monthlyMortgagePayment = PMT(
-    result.loanRate / 100 / 12,
-    result.months,
-    result.purchasePrice * (result.ltv / 100),
-    0
-  );
-  const totalMonthlyCost =
-    monthlyTaxes +
-    monthlyInsurance +
-    vacancy +
-    management +
-    capitalExpenditures +
-    repairs -
-    monthlyMortgagePayment;
-  const netMonthlyCashFlow = result.monthlyRent - totalMonthlyCost;
-  const onePercentRule = result.monthlyRent / result.purchasePrice;
-  const capRate =
-    ((result.monthlyRent -
-      monthlyTaxes -
-      monthlyInsurance -
-      vacancy -
-      management) *
-      12) /
-    result.purchasePrice;
-  const cashFlow = result.monthlyRent * 0.5 + monthlyMortgagePayment;
-  const totalClose =
-    result.purchasePrice * (1 - result.ltv / 100) +
-    //result.totalRehabCost +
-    result.closing;
-  const coCROI = (netMonthlyCashFlow * 12) / totalClose;
+  const {
+    capitalExpenditures,
+    capRate,
+    cashFlow,
+    coCROI,
+    management,
+    monthlyInsurance,
+    monthlyMortgagePayment,
+    monthlyTaxes,
+    netMonthlyCashFlow,
+    onePercentRule,
+    repairs,
+    totalClose,
+    vacancy,
+  } = generateDetails(result);
 
   return (
     <div>
@@ -771,6 +748,64 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
     </div>
   );
 };
+
+function generateDetails(result: SCHEMA) {
+  const monthlyTaxes = result.taxesYearly / 12;
+  const monthlyInsurance = result.insurance / 12;
+  const vacancy = (result.monthlyRent * result.vacancyRate) / 100;
+  const management = (result.monthlyRent * result.managementRate) / 100;
+  const capitalExpenditures =
+    (result.monthlyRent * result.capitalExpendituresRate) / 100;
+  const repairs = (result.monthlyRent * result.repairRate) / 100;
+
+  const monthlyMortgagePayment = PMT(
+    result.loanRate / 100 / 12,
+    result.months,
+    result.purchasePrice * (result.ltv / 100),
+    0
+  );
+  const totalMonthlyCost =
+    monthlyTaxes +
+    monthlyInsurance +
+    vacancy +
+    management +
+    capitalExpenditures +
+    repairs -
+    monthlyMortgagePayment;
+  const netMonthlyCashFlow = result.monthlyRent - totalMonthlyCost;
+  const onePercentRule = result.monthlyRent / result.purchasePrice;
+  const capRate =
+    ((result.monthlyRent -
+      monthlyTaxes -
+      monthlyInsurance -
+      vacancy -
+      management) *
+      12) /
+    result.purchasePrice;
+  const cashFlow = result.monthlyRent * 0.5 + monthlyMortgagePayment;
+  const totalClose =
+    result.purchasePrice * (1 - result.ltv / 100) +
+    //result.totalRehabCost +
+    result.closing;
+  const coCROI = (netMonthlyCashFlow * 12) / totalClose;
+
+  return {
+    capitalExpenditures,
+    capRate,
+    cashFlow,
+    coCROI,
+    management,
+    monthlyInsurance,
+    monthlyMortgagePayment,
+    monthlyTaxes,
+    netMonthlyCashFlow,
+    onePercentRule,
+    repairs,
+    totalClose,
+    totalMonthlyCost,
+    vacancy,
+  };
+}
 
 const GWB: React.FC<{
   good: React.ReactNode;

@@ -4,7 +4,6 @@ import { api } from "~/utils/api";
 export function useOgGraph(url: string) {
   const debounced = useDebounce(url, 300);
 
-  console.log(debounced);
   const query = api.main.scrapeUrl.useQuery({ url: debounced });
 
   return query;

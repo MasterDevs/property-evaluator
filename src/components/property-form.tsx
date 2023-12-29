@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { ExternalLink, Minus } from "lucide-react";
+import { Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Popover,
@@ -32,12 +32,12 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import Link from "next/link";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "~/components/ui/textarea";
 import { useOgGraph } from "~/hooks/use-og-graph";
 import OGPreview from "~/components/og-preview";
+import ShareCopyButton from "~/components/share-copy-button";
 
 const SCHEMA = z.object({
   purchasePrice: z.coerce.number().default(500000),
@@ -544,16 +544,12 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
         </Form>
         <Card className="md:rounded-l-none md:border-l-0">
           <CardHeader className="mb-5 border-b">
-            <CardTitle className="flex justify-between">
+            <CardTitle className="flex items-center justify-between">
               <span>{"KPI's"}</span>
-              <Link
-                href={shareUrl}
-                target="_blank"
-                className="flex items-center gap-1"
-              >
-                {"Share"}
-                <ExternalLink className="h-4 w-4" />
-              </Link>
+              <ShareCopyButton
+                url={shareUrl}
+                className="flex items-center text-lg"
+              />
             </CardTitle>
             <p className="italic text-muted-foreground">
               {"Long Term Rental KPI's"}

@@ -24,7 +24,7 @@ const OGPreview: React.FC<OGPreviewProps> = (props) => {
       {/* <pre>
         <code>{JSON.stringify(data, null, 2)}</code>
       </pre> */}
-      <div className="mx-auto flex max-w-xl gap-3 rounded border p-4">
+      <div className="mx-auto flex max-w-xl flex-col gap-3 rounded border p-4 md:flex-row">
         {imgUrl ? (
           <img src={imgUrl} className="h-32 w-auto object-cover" alt={title} />
         ) : null}

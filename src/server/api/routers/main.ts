@@ -10,11 +10,9 @@ export const mainRouter = createTRPCRouter({
   scrapeUrl: publicProcedure
     .input(z.object({ url: z.string() }))
     .query(async ({ input }) => {
-      console.log(input);
       const result = await ogs({
         url: input.url,
       });
-      console.log(result);
       return result.result;
     }),
   getSecretMessage: protectedProcedure.query(() => {

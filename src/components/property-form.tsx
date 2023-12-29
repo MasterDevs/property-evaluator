@@ -112,7 +112,9 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
   const shareUrl = React.useMemo(
     () =>
       `/?${Object.keys(result)
-        .map((k) => `${k}=${result[k as keyof typeof result]}`)
+        .map(
+          (k) => `${k}=${encodeURIComponent(result[k as keyof typeof result])}`
+        )
         .join("&")}`,
     [result]
   );

@@ -54,7 +54,17 @@ const SCHEMA = z.object({
   capitalExpendituresRate: z.coerce.number().default(5),
   repairRate: z.coerce.number().default(5),
   managementRate: z.coerce.number().default(0),
-  url: z.coerce.string().default(""),
+  url: z.coerce
+    .string()
+    .default("")
+    .transform((v) => {
+      if (
+        /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/.exec(v)
+      ) {
+        return atob(v);
+      }
+      return v;
+    }),
   notes: z.coerce.string().default(""),
 });
 
@@ -119,9 +129,11 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
   const shareUrl = React.useMemo(
     () =>
       `/?${Object.keys(result)
-        .map(
-          (k) => `${k}=${encodeURIComponent(result[k as keyof typeof result])}`
-        )
+        .map((k) => {
+          const key = k as keyof typeof result;
+          const value = key === "url" ? btoa(result[key]) : result[key];
+          return `${key}=${encodeURIComponent(value)}`;
+        })
         .join("&")}`,
     [result]
   );

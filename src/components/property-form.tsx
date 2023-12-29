@@ -62,14 +62,20 @@ type SCHEMA = z.infer<typeof SCHEMA>;
 
 /**
  *
- * @param ir interest rate per month
- * @param np number of periods (months)
- * @param pv present value
- * @param fv future value
+ * @param interestRatePerMonth interest rate per month
+ * @param numberOfPeriods number of periods (months)
+ * @param presentValue present value
+ * @param futureValue future value
  * @param type  0: end of the period, e.g. end of month (default) | 1: beginning of period
  * @returns
  */
-function PMT(ir: number, np: number, pv: number, fv: number, type: 0 | 1 = 0) {
+function PMT(
+  interestRatePerMonth: number,
+  numberOfPeriods: number,
+  presentValue: number,
+  futureValue: number,
+  type: 0 | 1 = 0
+) {
   /*
    * ir   - interest rate per month
    * np   - number of periods (months)
@@ -81,15 +87,16 @@ function PMT(ir: number, np: number, pv: number, fv: number, type: 0 | 1 = 0) {
    */
   let pmt: number;
 
-  fv || (fv = 0);
+  futureValue || (futureValue = 0);
   type || (type = 0);
 
-  if (ir === 0) return -(pv + fv) / np;
+  if (interestRatePerMonth === 0)
+    return -(presentValue + futureValue) / numberOfPeriods;
 
-  const pvif = Math.pow(1 + ir, np);
-  pmt = (-ir * (pv * pvif + fv)) / (pvif - 1);
+  const p = Math.pow(1 + interestRatePerMonth, numberOfPeriods);
+  pmt = (-interestRatePerMonth * (presentValue * p + futureValue)) / (p - 1);
 
-  if (type === 1) pmt /= 1 + ir;
+  if (type === 1) pmt /= 1 + interestRatePerMonth;
 
   return pmt;
 }

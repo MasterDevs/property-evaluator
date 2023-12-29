@@ -731,18 +731,6 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
                       <div className="">{"Closing Costs"}</div>
                       <Money value={result.closing} className="" />
                     </div>
-                    <div>
-                      {JSON.stringify(
-                        {
-                          totalClose,
-                          val: typeof totalClose,
-                          clos: typeof result.closing,
-                          purchase: typeof result.purchasePrice,
-                        },
-                        null,
-                        2
-                      )}
-                    </div>
                   </div>
                 }
               />

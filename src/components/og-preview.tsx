@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export type OGPreviewProps = {
   ogData?: OgObject;
-  url?: string;
+  url?: string | null;
 };
 
 const OGPreview: React.FC<OGPreviewProps> = (props) => {

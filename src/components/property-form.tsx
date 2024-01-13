@@ -32,43 +32,12 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "~/components/ui/textarea";
 import { useOgGraph } from "~/hooks/use-og-graph";
 import OGPreview from "~/components/og-preview";
 import ShareCopyButton from "~/components/share-copy-button";
-
-const SCHEMA = z.object({
-  purchasePrice: z.coerce.number().default(500000),
-  monthlyRent: z.coerce.number().default(1000),
-  insurance: z.coerce.number().default(1200),
-  loanRate: z.coerce.number().default(6.5),
-  ltv: z.coerce.number().default(80),
-  months: z.coerce.number().default(360),
-  totalRehabCost: z.coerce.number().default(15000),
-  postRehabValue: z.coerce.number().default(650000),
-  taxesYearly: z.coerce.number().default(7500),
-  closing: z.coerce.number().default(10000),
-  vacancyRate: z.coerce.number().default(5),
-  capitalExpendituresRate: z.coerce.number().default(5),
-  repairRate: z.coerce.number().default(5),
-  managementRate: z.coerce.number().default(0),
-  url: z.coerce
-    .string()
-    .default("")
-    .transform((v) => {
-      if (
-        /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/.exec(v)
-      ) {
-        return atob(v);
-      }
-      return v;
-    }),
-  notes: z.coerce.string().default(""),
-});
-
-type SCHEMA = z.infer<typeof SCHEMA>;
+import { PropertySchema } from "~/lib/schema";
 
 /**
  *
@@ -111,34 +80,24 @@ function PMT(
   return pmt;
 }
 
-const PropertyForm: React.FC<SCHEMA> = (props) => {
-  const form = useForm({
-    resolver: zodResolver(SCHEMA),
-    defaultValues: SCHEMA.parse(props),
+const PropertyForm: React.FC<PropertySchema> = (props) => {
+  const form = useForm<PropertySchema>({
+    resolver: zodResolver(PropertySchema),
+    defaultValues: PropertySchema.parse(props),
   });
 
   const values = form.watch();
   const result = React.useMemo(() => {
-    const r = SCHEMA.safeParse(values);
+    const r = PropertySchema.safeParse(values);
     if (r.success) {
       return r.data;
     }
     return values;
   }, [values]);
 
-  const shareUrl = React.useMemo(
-    () =>
-      `/?${Object.keys(result)
-        .map((k) => {
-          const key = k as keyof typeof result;
-          const value = key === "url" ? btoa(result[key]) : result[key];
-          return `${key}=${encodeURIComponent(value)}`;
-        })
-        .join("&")}`,
-    [result]
-  );
+  const shareUrl = React.useMemo(() => `/?id=${result.id}`, [result]);
 
-  const ogData = useOgGraph(result.url);
+  const ogData = useOgGraph(result.url ?? "");
 
   const {
     capitalExpenditures,
@@ -754,7 +713,7 @@ const PropertyForm: React.FC<SCHEMA> = (props) => {
   );
 };
 
-function generateDetails(result: SCHEMA) {
+function generateDetails(result: PropertySchema) {
   const monthlyTaxes = result.taxesYearly / 12;
   const monthlyInsurance = result.insurance / 12;
   const vacancy = (result.monthlyRent * result.vacancyRate) / 100;
@@ -788,6 +747,7 @@ function generateDetails(result: SCHEMA) {
       12) /
     result.purchasePrice;
   const cashFlow = result.monthlyRent * 0.5 + monthlyMortgagePayment;
+
   const totalClose =
     result.purchasePrice * (1 - result.ltv / 100) +
     //result.totalRehabCost +

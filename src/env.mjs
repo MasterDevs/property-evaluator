@@ -7,7 +7,7 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    DATABASE_URL: z.string().url(),
+    MD_DATABASE_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]),
     NEXTAUTH_SECRET:
       process.env.NODE_ENV === "production"
@@ -25,6 +25,9 @@ export const env = createEnv({
     DISCORD_CLIENT_SECRET: z.string(),
 
     CLERK_SECRET_KEY: z.string().min(1),
+    MD_DATABASE_HOST: z.string().min(1),
+    MD_DATABASE_USERNAME: z.string().min(1),
+    MD_DATABASE_PASSWORD: z.string().min(1),
   },
 
   /**
@@ -42,7 +45,7 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
-    DATABASE_URL: process.env.DATABASE_URL,
+    MD_DATABASE_URL: process.env.MD_DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
@@ -51,6 +54,9 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+    MD_DATABASE_HOST: process.env.MD_DATABASE_HOST,
+    MD_DATABASE_USERNAME: process.env.MD_DATABASE_USERNAME,
+    MD_DATABASE_PASSWORD: process.env.MD_DATABASE_PASSWORD,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

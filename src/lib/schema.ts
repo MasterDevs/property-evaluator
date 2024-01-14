@@ -5,6 +5,7 @@ import {
   mysqlTableCreator,
   char,
   decimal,
+  json,
 } from "drizzle-orm/mysql-core";
 export const TABLE_PREFIX = "propertyEvaluator_";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -12,41 +13,40 @@ import { z } from "zod";
 const mysqlTable = mysqlTableCreator((name) => `${TABLE_PREFIX}${name}`);
 
 function dollarColumn(name: string) {
-  return decimal(name, { precision: 11, scale: 2 }).notNull();
+  return decimal(name, { precision: 11, scale: 2 }).$type<number>().notNull();
 }
 
 function percentColumn(name: string) {
-  return decimal(name, { precision: 6, scale: 2 }).notNull();
+  return decimal(name, { precision: 6, scale: 2 }).$type<number>().notNull();
 }
 
-export const property = mysqlTable("property", {
+export const PropertyTable = mysqlTable("property", {
   id: char("id", { length: 21 }).primaryKey(),
   created: datetime("created").default(sql`CURRENT_TIMESTAMP`),
-  purchasePrice: dollarColumn("purchasePrice").default("500000"),
-  monthlyRent: dollarColumn("monthlyRent").default("2500"),
-  insurance: dollarColumn("insurance").default("1200"),
-  loanRate: percentColumn("loanRate").default("6.5"),
-  ltv: percentColumn("ltv").default("80"),
-  months: percentColumn("months").default("360"),
-  totalRehabCost: dollarColumn("totalRehabCost").default("15000"),
-  postRehabValue: dollarColumn("postRehabValue").default("650000"),
-  taxesYearly: dollarColumn("taxesYearly").default("7500"),
-  closing: dollarColumn("closing").default("10000"),
-  vacancyRate: percentColumn("vacancyRate").default("5"),
-  capitalExpendituresRate: percentColumn("capitalExpendituresRate").default(
-    "5"
-  ),
-  repairRate: percentColumn("repairRate").default("5"),
-  managementRate: percentColumn("managementRate").default("0"),
+  purchasePrice: dollarColumn("purchasePrice").default(500000).$type<number>(),
+  monthlyRent: dollarColumn("monthlyRent").default(2500),
+  insurance: dollarColumn("insurance").default(1200),
+  loanRate: percentColumn("loanRate").default(6.5),
+  ltv: percentColumn("ltv").default(80),
+  months: percentColumn("months").default(360),
+  totalRehabCost: dollarColumn("totalRehabCost").default(15000),
+  postRehabValue: dollarColumn("postRehabValue").default(650000),
+  taxesYearly: dollarColumn("taxesYearly").default(7500),
+  closing: dollarColumn("closing").default(10000),
+  vacancyRate: percentColumn("vacancyRate").default(5),
+  capitalExpendituresRate: percentColumn("capitalExpendituresRate").default(5),
+  repairRate: percentColumn("repairRate").default(5),
+  managementRate: percentColumn("managementRate").default(0),
   url: text("url").default("").notNull(),
   notes: text("name").default("").notNull(),
+  oginfo: json("oginfo").default({}),
 });
 
 function safeParsePropertyNumber(value: number) {
   return z.coerce.number().catch(value);
 }
 
-export const PropertySchema = createSelectSchema(property, {
+export const PropertySchema = createSelectSchema(PropertyTable, {
   capitalExpendituresRate: safeParsePropertyNumber(5),
   closing: safeParsePropertyNumber(10000),
   created: z.coerce.date().default(() => new Date()),
@@ -64,9 +64,10 @@ export const PropertySchema = createSelectSchema(property, {
   taxesYearly: safeParsePropertyNumber(7500),
   totalRehabCost: safeParsePropertyNumber(15000),
   url: z.coerce.string().catch("").default(""),
-
+  oginfo: z.object({}),
   vacancyRate: safeParsePropertyNumber(5),
 });
 
+//export const PropertySchema = createSelectSchema(PropertyTable);
 export type PropertySchema = z.infer<typeof PropertySchema>;
-export const insertPropertySchema = createInsertSchema(property);
+export const insertPropertySchema = createInsertSchema(PropertyTable);

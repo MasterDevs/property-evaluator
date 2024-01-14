@@ -1,25 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
-import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import PropertyForm from "~/components/property-form";
 import { api } from "~/utils/api";
-import { Button } from "~/components/ui/button";
-import { LoaderIcon } from "lucide-react";
 
-const Home: NextPage = () => {
+export default function PropertyPage() {
   const router = useRouter();
+  const id = router.query["id"] as string;
+  const property = api.main.getProperty.useQuery({ id });
 
-  const addProperty = api.main.newProperty.useMutation({
-    onSuccess: async (data) => {
-      await router.push(`/property/${data}`);
-    },
-    onError: (error) => {
-      console.error(error);
-      alert("Error creating property");
-    },
-  });
+  if (property.isLoading) return <div>Loading...</div>;
+
+  const p = property.data;
+
+  if (!p) return <div>Not Found</div>;
 
   return (
     <>
@@ -38,16 +33,7 @@ const Home: NextPage = () => {
             <span className="text-[#1694db]">Evaluator</span>
           </h1>
 
-          <Button
-            disabled={addProperty.isLoading}
-            onClick={() => addProperty.mutate()}
-          >
-            {addProperty.isLoading ? (
-              <LoaderIcon className="h-4 w-4" />
-            ) : (
-              "New Property"
-            )}
-          </Button>
+          <PropertyForm {...p} />
         </div>
         <div className="flex max-w-[10rem] flex-col items-center py-10 md:mt-10">
           <Link href={"https://masterdevs.com"}>
@@ -60,6 +46,4 @@ const Home: NextPage = () => {
       </main>
     </>
   );
-};
-
-export default Home;
+}

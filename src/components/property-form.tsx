@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { Minus } from "lucide-react";
+import { Loader2Icon, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Popover,
@@ -38,6 +38,7 @@ import { useOgGraph } from "~/hooks/use-og-graph";
 import OGPreview from "~/components/og-preview";
 import ShareCopyButton from "~/components/share-copy-button";
 import { PropertySchema } from "~/lib/schema";
+import { api } from "~/utils/api";
 
 /**
  *
@@ -86,6 +87,8 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
     defaultValues: PropertySchema.parse(props),
   });
 
+  const update = api.main.updateProperty.useMutation();
+
   const values = form.watch();
   const result = React.useMemo(() => {
     const r = PropertySchema.safeParse(values);
@@ -121,10 +124,20 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit((v) => {
-              console.log("Values", v);
+              update.mutate({
+                ...v,
+                oginfo: ogData.data ?? null,
+              });
             })}
             className="h-full w-full place-self-end rounded-lg border px-3 py-3 md:w-96 md:rounded-l-lg md:rounded-r-none"
           >
+            <Button type="submit" disabled={update.isLoading}>
+              {update.isLoading ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                "Save"
+              )}
+            </Button>
             <Accordion
               type="single"
               className="w-full"

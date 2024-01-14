@@ -6,6 +6,7 @@ import {
   char,
   decimal,
   json,
+  varchar,
 } from "drizzle-orm/mysql-core";
 export const TABLE_PREFIX = "propertyEvaluator_";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -40,6 +41,11 @@ export const PropertyTable = mysqlTable("property", {
   url: text("url").default("").notNull(),
   notes: text("name").default("").notNull(),
   oginfo: json("oginfo").default({}),
+});
+
+export const OGInfoTable = mysqlTable("oginfo", {
+  url: varchar("url", { length: 750 }).notNull().primaryKey(),
+  oginfo: json("oginfo").notNull(),
 });
 
 function safeParsePropertyNumber(value: number) {

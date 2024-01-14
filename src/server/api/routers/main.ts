@@ -6,18 +6,36 @@ import {
 } from "~/server/api/trpc";
 import ogs from "open-graph-scraper";
 import { db } from "~/lib/db";
-import { PropertySchema, PropertyTable } from "~/lib/schema";
+import { OGInfoTable, PropertySchema, PropertyTable } from "~/lib/schema";
 import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
+import { type OgObject } from "open-graph-scraper/dist/lib/types";
 
 export const mainRouter = createTRPCRouter({
   scrapeUrl: publicProcedure
     .input(z.object({ url: z.string() }))
     .query(async ({ input }) => {
+      const loweredUrl = input.url.toLowerCase();
+      const dbResult = await db.query.OGInfoTable.findFirst({
+        where: (t, { eq }) => eq(t.url, loweredUrl),
+      });
+
+      if (dbResult) {
+        return dbResult.oginfo as OgObject;
+      }
+
       const result = await ogs({
         url: input.url,
       });
-      return result.result;
+
+      if (result.result.success) {
+        await db.insert(OGInfoTable).values({
+          url: loweredUrl,
+          oginfo: result.result,
+        });
+        return result.result;
+      }
+      return undefined;
     }),
   newProperty: publicProcedure.mutation(async () => {
     const id = nanoid(21);

@@ -13,11 +13,15 @@ const OGPreview: React.FC<OGPreviewProps> = (props) => {
 
   if (!data) return null;
 
+  console.log(data);
+
   const imgUrl = data.ogImage?.[0]?.url;
 
   const title = data.ogTitle || data.dcTitle || data.twitterTitle;
   const description =
     data.ogDescription || data.dcDescription || data.twitterDescription;
+
+  console.log(title, description, imgUrl);
 
   return (
     <div>

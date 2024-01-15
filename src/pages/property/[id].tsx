@@ -28,10 +28,12 @@ export default function PropertyPage() {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          <h1 className="text-5xl font-extrabold tracking-tight underline decoration-[#a09d87] sm:text-[5rem]">
-            <span className="">Property</span>{" "}
-            <span className="text-[#1694db]">Evaluator</span>
-          </h1>
+          <Link href={"/"}>
+            <h1 className="text-5xl font-extrabold tracking-tight underline decoration-[#a09d87] sm:text-[5rem]">
+              <span className="">Property</span>{" "}
+              <span className="text-[#1694db]">Evaluator</span>
+            </h1>
+          </Link>
 
           <PropertyForm {...p} />
         </div>

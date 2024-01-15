@@ -140,6 +140,7 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
             </Button>
             <Accordion
               type="single"
+              collapsible
               className="w-full"
               defaultValue="property-details"
             >

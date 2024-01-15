@@ -565,7 +565,7 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
                 title="Monthly Cash Flow"
                 description={
                   <div>
-                    <GWB good={"> $400"} warn="> $100" bad="< $0" />
+                    <GWB good={"$400"} warn="$100" bad="$0" />
                     <p className="mb-3">{`Monthly revenue left after all expenses: `}</p>
                     <div className="mb-3 grid grid-cols-2 [&>*:nth-child(even)]:text-right">
                       <div className="mb-2 border-b font-bold">
@@ -627,7 +627,7 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
                 title="1% Percent Rule"
                 description={
                   <div>
-                    <GWB good={"> 1%"} warn="> 0.8%" bad="< 0.8%" />
+                    <GWB good={"1%"} warn="" bad="0.8%" />
                     <p className="mb-3">{`The 1% rule says that monthly rent should equal to 1% of the purchase price.`}</p>
                   </div>
                 }
@@ -641,7 +641,7 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
                 title="Cap Rate"
                 description={
                   <div>
-                    <GWB good={"> 8%"} warn="5-8%" bad={"< 5%"} />
+                    <GWB good={"8%"} warn="" bad={"5%"} />
                     <div className="my-3 flex flex-col divide-y-2 text-center">
                       <var>{"Net Operating Income"}</var>
                       <var>{"Market Value"}</var>
@@ -656,18 +656,20 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
                 title="50% Rule for Cash Flow"
                 description={
                   <div>
-                    <GWB good={"> $0"} warn="$0" bad={"< $0"} />
+                    <GWB good={"$0"} warn="" bad={"$0"} />
                     <p>{`The 50% Rule says that you should estimate your operating expenses to be 50% of gross income (sometimes referred to as an expense ratio of 50%).`}</p>
                     <div className="flex items-center justify-center">
                       <div className="my-3 flex items-center gap-3">
                         <div className="flex flex-col items-center">
-                          <var className={"border-b-2 px-2"}>
+                          <var className={"whitespace-nowrap border-b-2 px-2"}>
                             {"Monthly Rent"}
                           </var>
                           <var>{"2"}</var>
                         </div>
                         <Minus className="h-4 w-4" />
-                        <var>{"Mortgage Payment"}</var>
+                        <var className="whitespace-nowrap">
+                          {"Mortgage Payment"}
+                        </var>
                       </div>
                     </div>
                   </div>
@@ -681,7 +683,7 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
                 }
                 description={
                   <div>
-                    <GWB good={"> 8%"} warn="> 5%" bad="< 5%" />
+                    <GWB good={"8%"} warn="" bad="5%" />
                     <p>{`Cash-on-Cash return or (CoCROI) calculate the cash income earned on the cash invested in a property. It measures the annual return the investor made on the property in relation to the amount of mortgage paid during the same year.`}</p>
                     <p className="mt-2">{`Can we pull in more then the return we'd get from just putting our money in the S&P or some IndexFund.`}</p>
                     <div className="my-3 flex flex-col divide-y-2 text-center">
@@ -792,10 +794,32 @@ const GWB: React.FC<{
   bad: React.ReactNode;
 }> = (props) => {
   return (
-    <div className="mb-3 grid grid-cols-3 overflow-hidden rounded">
-      <div className="bg-red-200 text-center">{props.bad}</div>
-      <div className="bg-yellow-200 text-center">{props.warn}</div>
-      <div className="bg-green-200 text-center">{props.good}</div>
+    <div>
+      {/* <div className="mb-3 grid grid-cols-3 overflow-hidden rounded">
+        <div className="bg-red-200 pr-2 text-right text-muted-foreground">
+          {props.bad}
+        </div>
+        <div className="bg-yellow-200 text-center text-muted-foreground">
+          {props.warn}
+        </div>
+        <div className="bg-green-200 pl-2 text-left text-muted-foreground">
+          {props.good}
+        </div>
+      </div> */}
+      <div className="mb-3 grid grid-cols-3 overflow-hidden rounded">
+        <span className="text-right text-sm text-muted-foreground">
+          {props.bad}
+        </span>
+        <span className="text-center text-sm text-muted-foreground">
+          {props.warn}
+        </span>
+        <span className="text-left text-sm text-muted-foreground">
+          {props.good}
+        </span>
+        <div className="h-2 rounded-l bg-red-200"></div>
+        <div className="h-2 bg-yellow-200"></div>
+        <div className="h-2 rounded-r bg-green-200"></div>
+      </div>
     </div>
   );
 };

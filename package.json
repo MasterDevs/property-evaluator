@@ -52,7 +52,7 @@
     "clsx": "^1.2.1",
     "cmdk": "^0.2.0",
     "date-fns": "^2.30.0",
-    "drizzle-orm": "^0.29.3",
+    "drizzle-orm": "^0.33.0",
     "drizzle-zod": "^0.5.1",
     "lucide-react": "^0.221.0",
     "nanoid": "^5.0.4",

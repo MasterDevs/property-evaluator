@@ -39,6 +39,8 @@ import OGPreview from "~/components/og-preview";
 import ShareCopyButton from "~/components/share-copy-button";
 import { PropertySchema } from "~/lib/schema";
 import { api } from "~/utils/api";
+import { Switch } from "~/components/ui/switch";
+import { Label } from "~/components/ui/label";
 
 /**
  *
@@ -110,6 +112,7 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
     management,
     monthlyInsurance,
     monthlyMortgagePayment,
+    monthlyRev,
     monthlyTaxes,
     netMonthlyCashFlow,
     onePercentRule,
@@ -131,13 +134,27 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
             })}
             className="h-full w-full place-self-end rounded-lg border px-3 py-3 md:w-96 md:rounded-l-lg md:rounded-r-none"
           >
-            <Button type="submit" disabled={update.isLoading}>
-              {update.isLoading ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : (
-                "Save"
-              )}
-            </Button>
+            <div className="flex justify-between">
+              <Button type="submit" disabled={update.isLoading}>
+                {update.isLoading ? (
+                  <Loader2Icon className="size-4 animate-spin" />
+                ) : (
+                  "Save"
+                )}
+              </Button>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="mode"
+                  checked={values.mode === "ltr"}
+                  onCheckedChange={(v) =>
+                    form.setValue("mode", v ? "ltr" : "str")
+                  }
+                />
+                <Label htmlFor="mode">
+                  {values.mode === "ltr" ? "LTR" : "STR"}
+                </Label>
+              </div>
+            </div>
             <Accordion
               type="single"
               collapsible
@@ -317,30 +334,97 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
                 <AccordionTrigger>{"Income"}</AccordionTrigger>
                 <AccordionContent>
                   <div className="flex flex-col gap-2 border bg-gray-100 p-3">
-                    <FormField
-                      control={form.control}
-                      name="monthlyRent"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{"Rent"}</FormLabel>
-                          <FormControl>
-                            <div className="input-group">
-                              <span className="input-group-text">{"$"}</span>
-                              <Input
-                                {...field}
-                                type="number"
-                                inputMode="decimal"
-                                className="bg-white"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            {"Monthly Gross Rent"}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {values.mode === "ltr" ? (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="monthlyRent"
+                          key={"monthlyRent"}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{"Rent"}</FormLabel>
+                              <FormControl>
+                                <div className="input-group">
+                                  <span className="input-group-text">
+                                    {"$"}
+                                  </span>
+                                  <Input
+                                    {...field}
+                                    type="number"
+                                    inputMode="decimal"
+                                    className="bg-white"
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormDescription>
+                                {"Monthly Gross Rent"}
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="occupancyRate"
+                          key={"occupancyRate"}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{"Occupancy Rate"}</FormLabel>
+                              <FormControl>
+                                <div className="input-group">
+                                  <Input
+                                    {...field}
+                                    type="number"
+                                    className="bg-white"
+                                    inputMode="decimal"
+                                    step={0.5}
+                                  />
+                                  <span className="input-group-text">
+                                    {"%"}
+                                  </span>
+                                </div>
+                              </FormControl>
+                              <FormDescription>
+                                {
+                                  "What percentage of nights are rented in a given month?"
+                                }
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="averageNightlyRent"
+                          key={"averageNightlyRent"}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{"Average Nightly Rent"}</FormLabel>
+                              <FormControl>
+                                <div className="input-group">
+                                  <span className="input-group-text">
+                                    {"$"}
+                                  </span>
+                                  <Input
+                                    {...field}
+                                    type="number"
+                                    inputMode="decimal"
+                                    className="bg-white"
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormDescription>
+                                {"Average Nightly Rent"}
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -572,7 +656,7 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
                         {"Monthly Revenue"}
                       </div>
                       <Money
-                        value={result.monthlyRent}
+                        value={monthlyRev}
                         className="mb-2 border-b font-bold"
                       />
 
@@ -580,11 +664,15 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
                       <Money value={monthlyTaxes} decimalPlaces={0} />
                       <div>{"Insurance"}</div>
                       <Money value={monthlyInsurance} decimalPlaces={0} />
-                      <div>{`Vacancy (${getDisplaySpecial(
-                        result.vacancyRate / 100,
-                        "percent"
-                      )})`}</div>
-                      <Money value={vacancy} decimalPlaces={0} />
+                      {result.mode === "ltr" ? (
+                        <>
+                          <div>{`Vacancy (${getDisplaySpecial(
+                            result.vacancyRate / 100,
+                            "percent"
+                          )})`}</div>
+                          <Money value={vacancy} decimalPlaces={0} />
+                        </>
+                      ) : null}
                       {result.managementRate ? (
                         <>
                           <div>{`Management (${getDisplaySpecial(
@@ -730,13 +818,18 @@ const PropertyForm: React.FC<PropertySchema> = (props) => {
 };
 
 function generateDetails(result: PropertySchema) {
+  const isLtr = result.mode === "ltr";
+  const monthlyRev = isLtr
+    ? result.monthlyRent
+    : (result.averageNightlyRent * 365 * (result.occupancyRate / 100)) / 12;
+
   const monthlyTaxes = result.taxesYearly / 12;
   const monthlyInsurance = result.insurance / 12;
-  const vacancy = (result.monthlyRent * result.vacancyRate) / 100;
-  const management = (result.monthlyRent * result.managementRate) / 100;
+  const vacancy = isLtr ? (monthlyRev * result.vacancyRate) / 100 : 0;
+  const management = (monthlyRev * result.managementRate) / 100;
   const capitalExpenditures =
-    (result.monthlyRent * result.capitalExpendituresRate) / 100;
-  const repairs = (result.monthlyRent * result.repairRate) / 100;
+    (monthlyRev * result.capitalExpendituresRate) / 100;
+  const repairs = (monthlyRev * result.repairRate) / 100;
 
   const monthlyMortgagePayment = PMT(
     result.loanRate / 100 / 12,
@@ -752,17 +845,13 @@ function generateDetails(result: PropertySchema) {
     capitalExpenditures +
     repairs -
     monthlyMortgagePayment;
-  const netMonthlyCashFlow = result.monthlyRent - totalMonthlyCost;
-  const onePercentRule = result.monthlyRent / result.purchasePrice;
+  const netMonthlyCashFlow = monthlyRev - totalMonthlyCost;
+  const onePercentRule = monthlyRev / result.purchasePrice;
   const capRate =
-    ((result.monthlyRent -
-      monthlyTaxes -
-      monthlyInsurance -
-      vacancy -
-      management) *
+    ((monthlyRev - monthlyTaxes - monthlyInsurance - vacancy - management) *
       12) /
     result.purchasePrice;
-  const cashFlow = result.monthlyRent * 0.5 + monthlyMortgagePayment;
+  const cashFlow = monthlyRev * 0.5 + monthlyMortgagePayment;
 
   const totalClose =
     result.purchasePrice * (1 - result.ltv / 100) +
@@ -778,6 +867,7 @@ function generateDetails(result: PropertySchema) {
     management,
     monthlyInsurance,
     monthlyMortgagePayment,
+    monthlyRev,
     monthlyTaxes,
     netMonthlyCashFlow,
     onePercentRule,

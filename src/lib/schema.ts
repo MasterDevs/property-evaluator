@@ -7,6 +7,7 @@ import {
   decimal,
   json,
   varchar,
+  mysqlEnum,
 } from "drizzle-orm/mysql-core";
 export const TABLE_PREFIX = "propertyEvaluator_";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -20,7 +21,9 @@ function dollarColumn(name: string) {
 function percentColumn(name: string) {
   return decimal(name, { precision: 6, scale: 2 }).$type<number>().notNull();
 }
-
+/**
+ * Note when doing a PUSH, it's not going to be able to recognize the default value and look like there's way  more changes then necessary. Simply ignore that. The juice isn't worth the squeeze on a refactor just yet.
+ */
 export const PropertyTable = mysqlTable("property", {
   id: char("id", { length: 21 }).primaryKey(),
   created: datetime("created").default(sql`CURRENT_TIMESTAMP`),
@@ -41,6 +44,9 @@ export const PropertyTable = mysqlTable("property", {
   url: text("url").default("").notNull(),
   notes: text("name").default("").notNull(),
   oginfo: json("oginfo").default({}),
+  mode: mysqlEnum("mode", ["str", "ltr"]).default("ltr"),
+  occupancyRate: percentColumn("occupancyRate").default(75),
+  averageNightlyRent: dollarColumn("averageNightlyRent").default(250),
 });
 
 export const OGInfoTable = mysqlTable("oginfo", {
@@ -72,6 +78,8 @@ export const PropertySchema = createSelectSchema(PropertyTable, {
   url: z.coerce.string().catch("").default(""),
   oginfo: z.object({}),
   vacancyRate: safeParsePropertyNumber(5),
+  occupancyRate: safeParsePropertyNumber(75),
+  averageNightlyRent: safeParsePropertyNumber(250),
 });
 
 //export const PropertySchema = createSelectSchema(PropertyTable);
